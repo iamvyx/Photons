@@ -28,13 +28,37 @@ const char *fragment_shader_source = R"(
     } 
 )";
 
+const char *vertex_shader_source2 = R"(
+    #version 330 core
+    layout (location = 0) in vec3 aPos;
+
+    void main()
+    {
+        gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    }
+)";
+
+const char *fragment_shader_source2 = R"(
+    #version 330 core
+    out vec4 FragColor;
+
+    void main()
+    {
+        FragColor = vec4(0.5f, 0.5f, 0.2f, 1.0f);
+    } 
+)";
+
 GLFWwindow *g_window;
 
 GLuint g_program;
+GLuint g_program2;
+
 GLuint vertex_shader, fragment_shader;
 
 GLuint g_VAO;
+GLuint g_VAO2;
 GLuint g_VBO;
+GLuint g_VBO2;
 GLuint g_EBO;
 
 void framebuffer_callback(GLFWwindow *window, int width, int height);
@@ -84,30 +108,72 @@ int main()
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
 
+    vertex_shader = create_shader(GL_VERTEX_SHADER, vertex_shader_source2);
+    if (!vertex_shader) {
+        std::cerr << "Vertex Error\n";
+        return 1;
+    }
+
+    fragment_shader =
+        create_shader(GL_FRAGMENT_SHADER, fragment_shader_source2);
+    if (!vertex_shader) {
+        std::cerr << "Fragment Error\n";
+        return 1;
+    }
+
+    g_program2 = create_program();
+    if (!vertex_shader) {
+        std::cerr << "Program Error\n";
+        return 1;
+    }
+
+    glDeleteShader(vertex_shader);
+    glDeleteShader(fragment_shader);
+
     glGenVertexArrays(1, &g_VAO);
+    glGenVertexArrays(1, &g_VAO2);
     glGenBuffers(1, &g_VBO);
+    glGenBuffers(1, &g_VBO2);
     glGenBuffers(1, &g_EBO);
 
     float vertices[] = {
-        0.5f,  0.5f,  0.0f, // top right
-        0.5f,  -0.5f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f, // bottom left
-        -0.5f, 0.5f,  0.0f  // top left
+        0.1f, -0.5f, 0.0f, // Left
+        0.9f, -0.5f, 0.0f, // Right
+        0.5f, 0.5f,  0.0f, // Top
     };
 
-    unsigned int indices[] = {
-        0, 1, 3, // First Set
-        1, 2, 3  // Second Set
+    float vertices2[] = {
+        -0.1f, -0.5f, 0.0f, // Left 2
+        -0.9f, -0.5f, 0.0f, // Right 2
+        -0.5f, 0.5f,  0.0f  // Top 2
     };
+
+    // unsigned int indices[] = {
+    //     0, 1, 3, // First Set
+    //     1, 2, 3  // Second Set
+    // };
 
     glBindVertexArray(g_VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, g_VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-                 GL_STATIC_DRAW);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_EBO);
+    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+    //              GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+                          (void *)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindVertexArray(0);
+
+    glBindVertexArray(g_VAO2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, g_VBO2);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
                           (void *)0);
@@ -124,9 +190,14 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(g_program);
+
         glBindVertexArray(g_VAO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_EBO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        glUseProgram(g_program2);
+
+        glBindVertexArray(g_VAO2);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(g_window);
         glfwPollEvents();
