@@ -12,7 +12,7 @@ add_executable(photons
     src/main.cpp
 )
 
-target_include_directories(photons PUBLIC
+target_include_directories(photons PRIVATE
     ${CMAKE_SOURCE_DIR}/vendor/glfw/include
     ${CMAKE_SOURCE_DIR}/vendor/glad/include
 )
