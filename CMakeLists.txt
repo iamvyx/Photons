@@ -10,9 +10,21 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 
 add_executable(photons 
     src/main.cpp
+
+    # Core
+    src/core/Engine.cpp
+    src/core/Engine.h
+    src/core/Window.cpp
+    src/core/Window.h
+
+    # Renderer
+    src/renderer/Renderer.cpp
+    src/renderer/Renderer.h
 )
 
 target_include_directories(photons PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+
     ${CMAKE_SOURCE_DIR}/vendor/glfw/include
     ${CMAKE_SOURCE_DIR}/vendor/glad/include
 )
